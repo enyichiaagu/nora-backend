@@ -3,10 +3,11 @@ import { AssemblyAI } from 'assemblyai'
 import recorder from 'node-record-lpcm16'
 import WebSocket from 'ws'
 
+const wss = new WebSocket.server({server})
+const client = new AssemblyAI({
+  apiKey: process.env.ASSEMBLY_AI,
+});
 export async function start() {
-  const client = new AssemblyAI({
-    apiKey: process.env.ASSEMBLY_AI,
-  });
 
   const transcriber = client.streaming.transcriber({
     sampleRate: 16_000,
