@@ -1,4 +1,4 @@
-import express, type { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 
 const app = express();
