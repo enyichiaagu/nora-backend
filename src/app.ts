@@ -1,4 +1,4 @@
-import { createServer } from 'http';
+import { createServer } from 'node:http';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { AssemblyAI } from 'assemblyai';
