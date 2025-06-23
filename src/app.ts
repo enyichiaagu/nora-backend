@@ -4,7 +4,7 @@ import { WebSocketServer } from 'ws';
 import { AssemblyAI } from 'assemblyai';
 
 const client = new AssemblyAI({
-  apiKey: '5a1adfc2fa814c4a90c0f8110077d0db',
+  apiKey: process.env.ASSEMBLY_AI,
 });
 const transcriber = client.streaming.transcriber({
   sampleRate: 16_000,
