@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { AssemblyAI } from 'assemblyai';
+import 'dotenv/config'
 
 const client = new AssemblyAI({
   apiKey: process.env.ASSEMBLY_AI,
