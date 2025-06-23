@@ -17,6 +17,7 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', async function connection(ws) {
+  console.log('client connected');
   ws.on('error', console.error);
   ws.on('message', function message(audioBuffer: ArrayBuffer) {
     transcriber.sendAudio(audioBuffer);
