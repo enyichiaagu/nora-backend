@@ -1,52 +1,66 @@
-import { createServer } from 'node:http';
+import { createServer } from 'http';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { AssemblyAI } from 'assemblyai';
-import 'dotenv/config'
-
-const client = new AssemblyAI({
-  apiKey: process.env.ASSEMBLY_AI,
-});
-const transcriber = client.streaming.transcriber({
-  sampleRate: 16_000,
-  formatTurns: true,
-});
 
 const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
+const client = new AssemblyAI({
+  apiKey: process.env.ASSEMBLY_AI || '',
+});
+
 wss.on('connection', async function connection(ws) {
-  console.log('client connected');
-  ws.on('error', console.error);
-  ws.on('message', function message(audioBuffer: ArrayBuffer) {
-    transcriber.sendAudio(audioBuffer);
+  const transcriber = client.streaming.transcriber({
+    sampleRate: 16_000,
+    formatTurns: true,
   });
-  ws.on('close', async () => {
-    console.log('Closing streaming transcript connection');
-    transcriber.close();
-  });
+
+  let CONNECTED = false;
 
   transcriber.on('open', ({ id }) => {
     console.log(`Session opened with ID:${id}`);
+    CONNECTED = true;
   });
-  transcriber.on('error', (error) => {
-    console.error('Error:', error);
-  });
+
   transcriber.on('close', (code, reason) =>
     console.log('Session closed:', code, reason)
   );
+
   transcriber.on('turn', (turn) => {
+    console.log('sending output to client');
     if (!turn.transcript) {
       return;
     }
+
     ws.send(JSON.stringify({ transcript: turn.transcript }));
   });
 
-  console.log('Connecting to streaming transcript service');
+  transcriber.on('error', (error) => {
+    ws.close();
+    console.error(error);
+  });
+
+  ws.on('error', console.error);
+
+  ws.on('message', function message(audioBuffer: ArrayBuffer) {
+    if (CONNECTED) transcriber.sendAudio(audioBuffer);
+  });
+
+  ws.on('close', async () => {
+    console.log('Closing streaming transcript connection');
+    await transcriber.close();
+    CONNECTED = false;
+    console.log('[Assembly AI] stream closed!');
+  });
+
+  console.log('client connected');
+
+  // Handling AssemblyAI Transcriber
   await transcriber.connect();
-  console.log('[AssemblyAI] Connected');
 });
 
-server.listen(3000, () => console.log('Started Backend Server'));
-wss.on('listening', () => console.log('[WS] Connection Open'));
+server.listen(3000, () => {
+  console.log('Started Server');
+});
