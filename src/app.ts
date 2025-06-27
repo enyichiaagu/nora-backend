@@ -22,6 +22,8 @@ app.get('/transcript', (req, res) => {
       sampleRate: 16_000,
       formatTurns: true,
     });
+    const MAX_CHUNK = 3200; // In relation to the 16Hz sample rate
+    let MAX_BUFFERED = MAX_CHUNK * 10;
 
     let CONNECTED = false;
 
@@ -51,7 +53,9 @@ app.get('/transcript', (req, res) => {
     ws.on('error', console.error);
 
     ws.on('message', function message(audioBuffer: ArrayBuffer) {
-      if (CONNECTED) transcriber.sendAudio(audioBuffer);
+      if (CONNECTED && audioBuffer.byteLength <= MAX_BUFFERED) {
+        transcriber.sendAudio(audioBuffer);
+      }
     });
 
     ws.on('close', async () => {
