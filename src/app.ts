@@ -8,7 +8,7 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
 const client = new AssemblyAI({
-  apiKey: process.env.ASSEMBLY_AI || 'd260ceab81d34dc292af07e3c3bdb40a',
+  apiKey: process.env.ASSEMBLY_AI || '',
 });
 
 app.get('/ping', (req, res) => {
@@ -66,7 +66,7 @@ app.get('/transcript', (req, res) => {
     // Handling AssemblyAI Transcriber
     await transcriber.connect();
   });
-  res.send({text: 'Transcription Starting...'})
+  res.send({ text: 'Transcription Starting...' });
 });
 
 server.listen(3000, () => {
