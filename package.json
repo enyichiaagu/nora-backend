@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "dev": "NODE_OPTIONS='--loader ts-node/esm' ts-node-dev --respawn --transpile-only src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
