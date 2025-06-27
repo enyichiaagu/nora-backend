@@ -66,6 +66,7 @@ app.get('/transcript', (req, res) => {
     // Handling AssemblyAI Transcriber
     await transcriber.connect();
   });
+  res.send({text: 'Transcription Starting...'})
 });
 
 server.listen(3000, () => {
