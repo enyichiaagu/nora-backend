@@ -13,6 +13,7 @@ const client = new AssemblyAI({
 
 app.get('/ping', (req, res) => {
   // TODO: Count Website Visitors
+  console.log('PING REQUESTED');
   res.send({ text: 'pong' });
 });
 
