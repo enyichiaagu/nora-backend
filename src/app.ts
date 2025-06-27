@@ -16,7 +16,7 @@ app.get('/ping', (req, res) => {
   res.send({ text: 'pong' });
 });
 
-app.get('/transcripts', (req, res) => {
+app.get('/transcript', (req, res) => {
   wss.on('connection', async function connection(ws) {
     const transcriber = client.streaming.transcriber({
       sampleRate: 16_000,
