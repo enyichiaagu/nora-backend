@@ -8,57 +8,64 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
 const client = new AssemblyAI({
-  apiKey: process.env.ASSEMBLY_AI || '',
+  apiKey: process.env.ASSEMBLY_AI || 'd260ceab81d34dc292af07e3c3bdb40a',
 });
 
-wss.on('connection', async function connection(ws) {
-  const transcriber = client.streaming.transcriber({
-    sampleRate: 16_000,
-    formatTurns: true,
+app.get('/ping', (req, res) => {
+  // TODO: Count Website Visitors
+  res.send({ text: 'pong' });
+});
+
+app.get('/transcripts', (req, res) => {
+  wss.on('connection', async function connection(ws) {
+    const transcriber = client.streaming.transcriber({
+      sampleRate: 16_000,
+      formatTurns: true,
+    });
+
+    let CONNECTED = false;
+
+    transcriber.on('open', ({ id }) => {
+      console.log(`Session opened with ID:${id}`);
+      CONNECTED = true;
+    });
+
+    transcriber.on('close', (code, reason) =>
+      console.log('Session closed:', code, reason)
+    );
+
+    transcriber.on('turn', (turn) => {
+      console.log('sending output to client');
+      if (!turn.transcript) {
+        return;
+      }
+
+      ws.send(JSON.stringify({ transcript: turn.transcript }));
+    });
+
+    transcriber.on('error', (error) => {
+      ws.close();
+      console.error(error);
+    });
+
+    ws.on('error', console.error);
+
+    ws.on('message', function message(audioBuffer: ArrayBuffer) {
+      if (CONNECTED) transcriber.sendAudio(audioBuffer);
+    });
+
+    ws.on('close', async () => {
+      console.log('Closing streaming transcript connection');
+      await transcriber.close();
+      CONNECTED = false;
+      console.log('[Assembly AI] stream closed!');
+    });
+
+    console.log('client connected');
+
+    // Handling AssemblyAI Transcriber
+    await transcriber.connect();
   });
-
-  let CONNECTED = false;
-
-  transcriber.on('open', ({ id }) => {
-    console.log(`Session opened with ID:${id}`);
-    CONNECTED = true;
-  });
-
-  transcriber.on('close', (code, reason) =>
-    console.log('Session closed:', code, reason)
-  );
-
-  transcriber.on('turn', (turn) => {
-    console.log('sending output to client');
-    if (!turn.transcript) {
-      return;
-    }
-
-    ws.send(JSON.stringify({ transcript: turn.transcript }));
-  });
-
-  transcriber.on('error', (error) => {
-    ws.close();
-    console.error(error);
-  });
-
-  ws.on('error', console.error);
-
-  ws.on('message', function message(audioBuffer: ArrayBuffer) {
-    if (CONNECTED) transcriber.sendAudio(audioBuffer);
-  });
-
-  ws.on('close', async () => {
-    console.log('Closing streaming transcript connection');
-    await transcriber.close();
-    CONNECTED = false;
-    console.log('[Assembly AI] stream closed!');
-  });
-
-  console.log('client connected');
-
-  // Handling AssemblyAI Transcriber
-  await transcriber.connect();
 });
 
 server.listen(3000, () => {
