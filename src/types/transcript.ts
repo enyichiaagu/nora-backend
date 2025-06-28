@@ -3,11 +3,6 @@ export interface AudioMessage {
   conversationId: string;
 }
 
-export interface TranscriptEntry {
-  text: string;
-  timestamp: Date;
-}
-
 export interface ConversationTranscript {
   id?: string;
   conversation_id: string;

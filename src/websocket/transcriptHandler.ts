@@ -25,16 +25,14 @@ export function setupWebSocket(server: Server) {
     
     let CONNECTED = false;
     let currentConversationId: string | null = null;
-    let transcriptBuffer: TranscriptEntry[] = [];
+    let transcriptBuffer: string[] = [];
 
     // Save transcripts to Supabase
     async function saveTranscripts() {
       if (transcriptBuffer.length === 0 || !currentConversationId) return;
 
       try {
-        const transcriptData = transcriptBuffer
-          .map(entry => `[${entry.timestamp.toISOString()}] ${entry.text}`)
-          .join('\n');
+        const transcriptData = transcriptBuffer.join('\n');
 
         const { error } = await supabase
           .from('conversation_transcripts')
@@ -52,7 +50,7 @@ export function setupWebSocket(server: Server) {
         console.error('Error saving transcripts:', error);
       }
 
-      transcriptBuffer = [];
+      transcriptBuffer.length = 0; // Clear array efficiently
     }
 
     transcriber.on('open', ({ id }) => {
@@ -72,10 +70,8 @@ export function setupWebSocket(server: Server) {
 
       // Save end-of-turn transcripts
       if (turn.end_of_turn && currentConversationId) {
-        transcriptBuffer.push({
-          text: turn.transcript,
-          timestamp: new Date()
-        });
+        const timestamp = new Date().toISOString();
+        transcriptBuffer.push(`[${timestamp}] ${turn.transcript}`);
 
         // Save when buffer reaches max lines
         if (transcriptBuffer.length >= MAX_TRANSCRIPT_LINES) {
@@ -126,7 +122,7 @@ export function setupWebSocket(server: Server) {
       await transcriber.close();
       CONNECTED = false;
       currentConversationId = null;
-      transcriptBuffer = [];
+      transcriptBuffer.length = 0;
       console.log('[Assembly AI] stream closed!');
     });
 
