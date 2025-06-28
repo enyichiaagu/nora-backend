@@ -2,7 +2,7 @@ import { Server } from 'http';
 import { WebSocketServer } from 'ws';
 import { AssemblyAI } from 'assemblyai';
 import { supabase } from '../lib/supabase.js';
-import type { AudioMessage, TranscriptEntry } from '../types/transcript.js';
+import type { AudioMessage } from '../types/transcript.js';
 
 const client = new AssemblyAI({
   apiKey: process.env.ASSEMBLY_AI || '',
@@ -27,7 +27,7 @@ export function setupWebSocket(server: Server) {
     let currentConversationId: string | null = null;
     let transcriptBuffer: string[] = [];
 
-    // Save transcripts to Supabase
+    // Save transcripts to Supabase sessions table
     async function saveTranscripts() {
       if (transcriptBuffer.length === 0 || !currentConversationId) return;
 
@@ -35,22 +35,20 @@ export function setupWebSocket(server: Server) {
         const transcriptData = transcriptBuffer.join('\n');
 
         const { error } = await supabase
-          .from('conversation_transcripts')
-          .insert({
-            conversation_id: currentConversationId,
-            transcript_data: transcriptData
-          });
+          .from('sessions')
+          .update({ notes: transcriptData })
+          .eq('conversation_id', currentConversationId);
 
         if (error) {
           console.error('Error saving transcripts:', error);
         } else {
-          console.log(`Saved ${transcriptBuffer.length} transcript lines for conversation ${currentConversationId}`);
+          console.log(`Updated notes for conversation ${currentConversationId} with ${transcriptBuffer.length} transcript lines`);
         }
       } catch (error) {
         console.error('Error saving transcripts:', error);
       }
 
-      transcriptBuffer.length = 0; // Clear array efficiently
+      transcriptBuffer.length = 0;
     }
 
     transcriber.on('open', ({ id }) => {
