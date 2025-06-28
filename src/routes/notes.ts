@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../lib/supabase.js';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 
 const router = Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -22,11 +22,14 @@ router.get('/:id', async (req, res) => {
       .single();
 
     if (error || !session) {
+      console.log(error);
       return res.status(404).json({ error: 'Session not found' });
     }
 
     if (!session.notes) {
-      return res.status(400).json({ error: 'No transcripts available for this session' });
+      return res
+        .status(400)
+        .json({ error: 'No transcripts available for this session' });
     }
 
     // Generate study notes using Gemini
@@ -38,20 +41,21 @@ ${session.notes}
 
 Study Notes:`;
 
-    const result = await model.generateContent(prompt);
-    const studyNotes = result.response.text().trim();
-
     // Create PDF
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
-    const maxWidth = pageWidth - (margin * 2);
+    const maxWidth = pageWidth - margin * 2;
+
+    // AI Stuff
+    const result = await model.generateContent(prompt);
+    const studyNotes = result.response.text().trim();
 
     // Header with logo placeholder and title
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.text('[LOGO]', margin, 30);
-    
+
     doc.setFontSize(20);
     doc.text('Nora Summary Note', pageWidth / 2, 30, { align: 'center' });
 
@@ -79,15 +83,19 @@ Study Notes:`;
     const currentTime = new Date().toLocaleString();
     doc.setFontSize(8);
     doc.setFont('helvetica', 'italic');
-    doc.text(`Generated on ${currentTime}`, pageWidth / 2, 280, { align: 'center' });
+    doc.text(`Generated on ${currentTime}`, pageWidth / 2, 280, {
+      align: 'center',
+    });
 
     // Send PDF
     const pdfBuffer = doc.output('arraybuffer');
-    
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="notes-${id}.pdf"`);
-    res.send(Buffer.from(pdfBuffer));
 
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="notes-${id}.pdf"`
+    );
+    res.send(Buffer.from(pdfBuffer));
   } catch (error) {
     console.error('Error generating PDF notes:', error);
     res.status(500).json({ error: 'Failed to generate PDF notes' });
