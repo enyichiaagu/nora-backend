@@ -12,7 +12,6 @@ export function setupWebSocket(server: Server) {
   const wss = new WebSocketServer({ server, path: '/transcript' });
 
   wss.on('connection', async function connection(ws) {
-    console.log('TRANSCRIPTS REQUESTED!!');
 
     const transcriber = client.streaming.transcriber({
       sampleRate: 16_000,
@@ -101,9 +100,6 @@ export function setupWebSocket(server: Server) {
           currentConversationId = message.conversationId;
         } else if (!currentConversationId) {
           currentConversationId = message.conversationId;
-          console.log(
-            `Started tracking conversation: ${currentConversationId}`
-          );
         }
 
         // Convert audio array to buffer and send to transcriber
