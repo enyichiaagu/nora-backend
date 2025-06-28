@@ -10,18 +10,18 @@ router.post('/', async (req, res) => {
     const { conversational_context } = req.body;
 
     if (!conversational_context) {
-      return res.status(400).json({ 
-        error: 'conversational_context is required' 
+      return res.status(400).json({
+        error: 'conversational_context is required',
       });
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ 
-        error: 'Gemini API key not configured' 
+      return res.status(500).json({
+        error: 'Gemini API key not configured',
       });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
 
     // Generate title
     const titlePrompt = `Based on the following conversation context, generate a short, descriptive title (maximum 6 words) that captures the main topic or theme of the conversation:
@@ -40,22 +40,21 @@ Description:`;
     // Run both prompts concurrently
     const [titleResult, descriptionResult] = await Promise.all([
       model.generateContent(titlePrompt),
-      model.generateContent(descriptionPrompt)
+      model.generateContent(descriptionPrompt),
     ]);
 
     const title = titleResult.response.text().trim();
     const description = descriptionResult.response.text().trim();
 
-    res.json({ 
+    res.json({
       title,
       description,
-      conversational_context 
+      conversational_context,
     });
-
   } catch (error) {
     console.error('Error generating conversation data:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate conversation data' 
+    res.status(500).json({
+      error: 'Failed to generate conversation data',
     });
   }
 });
