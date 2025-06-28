@@ -31,7 +31,7 @@ Context: ${conversational_context}
 Title:`;
 
     // Generate description
-    const descriptionPrompt = `Based on the following conversation context, generate a brief description (1-2 sentences) that summarizes what the conversation is about:
+    const descriptionPrompt = `Based on the following conversation context, generate a short description (1 sentence) that summarizes what the user woll learn from the discussion. Make it at most 10 words:
 
 Context: ${conversational_context}
 
