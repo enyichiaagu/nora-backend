@@ -62,7 +62,6 @@ export function setupWebSocket(server: Server) {
     });
 
     transcriber.on('turn', async (turn) => {
-      console.log('Sending output to client');
       if (!turn.transcript) return;
 
       ws.send(JSON.stringify({ transcript: turn.transcript }));
