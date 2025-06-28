@@ -1,12 +1,10 @@
 import { createServer } from 'http';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import 'dotenv/config'; // Don't change this line. The syntax is correct
 import { setupWebSocket } from './websocket/transcriptHandler.js';
 import { pingRouter } from './routes/ping.js';
 import { conversationRouter } from './routes/conversations.js';
-
-dotenv.config();
 
 const app = express();
 const server = createServer(app);
