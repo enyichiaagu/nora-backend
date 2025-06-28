@@ -1,6 +1,6 @@
 import { Server } from 'http';
 import { WebSocketServer } from 'ws';
-import { AssemblyAI } from 'assemblyai';
+import { AssemblyAI, type StreamingTranscriberParams } from 'assemblyai';
 import { supabase } from '../lib/supabase.js';
 import type { AudioMessage } from '../types/transcript.js';
 
@@ -12,10 +12,10 @@ export function setupWebSocket(server: Server) {
   const wss = new WebSocketServer({ server, path: '/transcript' });
 
   wss.on('connection', async function connection(ws) {
-
     const transcriber = client.streaming.transcriber({
       sampleRate: 16_000,
       formatTurns: true,
+      endOfTurnConfidenceThreshold: 0.8,
     });
 
     const MAX_CHUNK = 3200;
@@ -61,7 +61,7 @@ export function setupWebSocket(server: Server) {
       console.log('Session closed:', code, reason);
     });
 
-    transcriber.on('turn', async (turn) => {
+    transcriber.on('turn', (turn) => {
       if (!turn.transcript) return;
 
       ws.send(JSON.stringify({ transcript: turn.transcript }));
@@ -73,12 +73,13 @@ export function setupWebSocket(server: Server) {
 
         // Save when buffer reaches max lines
         if (transcriptBuffer.length >= MAX_TRANSCRIPT_LINES) {
-          await saveTranscripts();
+          saveTranscripts();
         }
       }
     });
 
-    transcriber.on('error', (error) => {
+    transcriber.on('error', async (error) => {
+      await saveTranscripts();
       ws.close();
       console.error('Transcriber error:', error);
     });
