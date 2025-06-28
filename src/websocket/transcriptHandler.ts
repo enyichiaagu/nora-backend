@@ -67,7 +67,7 @@ export function setupWebSocket(server: Server) {
       ws.send(JSON.stringify({ transcript: turn.transcript }));
 
       // Save end-of-turn transcripts
-      if (turn.end_of_turn && currentConversationId) {
+      if (turn.end_of_turn && turn.turn_is_formatted && currentConversationId) {
         const timestamp = new Date().toISOString();
         transcriptBuffer.push(`[${timestamp}] ${turn.transcript}`);
 
