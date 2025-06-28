@@ -87,27 +87,40 @@ export function setupWebSocket(server: Server) {
 
     ws.on('message', function message(data: Buffer) {
       try {
-        const message: AudioMessage = JSON.parse(data.toString());
-        
-        // Check if conversation ID changed
-        if (currentConversationId && currentConversationId !== message.conversationId) {
-          console.log('Conversation ID changed, saving remaining transcripts');
-          saveTranscripts();
-          currentConversationId = message.conversationId;
-        } else if (!currentConversationId) {
-          currentConversationId = message.conversationId;
-          console.log(`Started tracking conversation: ${currentConversationId}`);
-        }
+        // Check if data is JSON (starts with '{' or '[')
+        const dataString = data.toString();
+        if (dataString.startsWith('{') || dataString.startsWith('[')) {
+          // Handle JSON format with conversationId
+          const message: AudioMessage = JSON.parse(dataString);
+          
+          // Check if conversation ID changed
+          if (currentConversationId && currentConversationId !== message.conversationId) {
+            console.log('Conversation ID changed, saving remaining transcripts');
+            saveTranscripts();
+            currentConversationId = message.conversationId;
+          } else if (!currentConversationId) {
+            currentConversationId = message.conversationId;
+            console.log(`Started tracking conversation: ${currentConversationId}`);
+          }
 
-        // Convert audio array to buffer and send to transcriber
-        if (CONNECTED && message.audio && Array.isArray(message.audio)) {
-          const audioBuffer = Buffer.from(message.audio);
-          if (audioBuffer.byteLength <= MAX_BUFFERED) {
-            transcriber.sendAudio(audioBuffer);
+          // Convert audio array to buffer and send to transcriber
+          if (CONNECTED && message.audio && Array.isArray(message.audio)) {
+            const audioBuffer = Buffer.from(message.audio);
+            if (audioBuffer.byteLength <= MAX_BUFFERED) {
+              transcriber.sendAudio(audioBuffer);
+            }
+          }
+        } else {
+          // Handle raw binary audio data (fallback)
+          if (CONNECTED && data.byteLength <= MAX_BUFFERED) {
+            transcriber.sendAudio(data);
           }
         }
       } catch (error) {
-        console.error('Error parsing message:', error);
+        // If JSON parsing fails, treat as raw audio data
+        if (CONNECTED && data.byteLength <= MAX_BUFFERED) {
+          transcriber.sendAudio(data);
+        }
       }
     });
 
