@@ -59,7 +59,7 @@ Study Notes:`;
       const logoBase64 = `data:image/png;base64,${logoData.toString('base64')}`;
       
       // Add logo centered at top
-      const logoWidth = 40;
+      const logoWidth = 60;
       const logoHeight = 20;
       const logoX = (pageWidth - logoWidth) / 2;
       doc.addImage(logoBase64, 'PNG', logoX, 20, logoWidth, logoHeight);
