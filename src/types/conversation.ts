@@ -4,5 +4,6 @@ export interface ConversationRequest {
 
 export interface ConversationResponse {
   title: string;
+  description: string;
   conversational_context: string;
 }

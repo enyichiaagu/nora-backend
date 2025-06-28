@@ -23,24 +23,39 @@ router.post('/', async (req, res) => {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const prompt = `Based on the following conversation context, generate a short, descriptive title (maximum 6 words) that captures the main topic or theme of the conversation:
+    // Generate title
+    const titlePrompt = `Based on the following conversation context, generate a short, descriptive title (maximum 6 words) that captures the main topic or theme of the conversation:
 
 Context: ${conversational_context}
 
 Title:`;
 
-    const result = await model.generateContent(prompt);
-    const title = result.response.text().trim();
+    // Generate description
+    const descriptionPrompt = `Based on the following conversation context, generate a brief description (1-2 sentences) that summarizes what the conversation is about:
+
+Context: ${conversational_context}
+
+Description:`;
+
+    // Run both prompts concurrently
+    const [titleResult, descriptionResult] = await Promise.all([
+      model.generateContent(titlePrompt),
+      model.generateContent(descriptionPrompt)
+    ]);
+
+    const title = titleResult.response.text().trim();
+    const description = descriptionResult.response.text().trim();
 
     res.json({ 
       title,
+      description,
       conversational_context 
     });
 
   } catch (error) {
-    console.error('Error generating conversation title:', error);
+    console.error('Error generating conversation data:', error);
     res.status(500).json({ 
-      error: 'Failed to generate conversation title' 
+      error: 'Failed to generate conversation data' 
     });
   }
 });
