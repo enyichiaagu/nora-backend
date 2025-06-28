@@ -13,16 +13,16 @@ export function setupWebSocket(server: Server) {
 
   wss.on('connection', async function connection(ws) {
     console.log('TRANSCRIPTS REQUESTED!!');
-    
+
     const transcriber = client.streaming.transcriber({
       sampleRate: 16_000,
       formatTurns: true,
     });
-    
+
     const MAX_CHUNK = 3200;
     const MAX_BUFFERED = MAX_CHUNK * 10;
     const MAX_TRANSCRIPT_LINES = 100;
-    
+
     let CONNECTED = false;
     let currentConversationId: string | null = null;
     let transcriptBuffer: string[] = [];
@@ -42,7 +42,9 @@ export function setupWebSocket(server: Server) {
         if (error) {
           console.error('Error saving transcripts:', error);
         } else {
-          console.log(`Updated notes for conversation ${currentConversationId} with ${transcriptBuffer.length} transcript lines`);
+          console.log(
+            `Updated notes for conversation ${currentConversationId} with ${transcriptBuffer.length} transcript lines`
+          );
         }
       } catch (error) {
         console.error('Error saving transcripts:', error);
@@ -88,15 +90,20 @@ export function setupWebSocket(server: Server) {
     ws.on('message', function message(data: Buffer) {
       try {
         const message: AudioMessage = JSON.parse(data.toString());
-        
+
         // Check if conversation ID changed
-        if (currentConversationId && currentConversationId !== message.conversationId) {
+        if (
+          currentConversationId &&
+          currentConversationId !== message.conversationId
+        ) {
           console.log('Conversation ID changed, saving remaining transcripts');
           saveTranscripts();
           currentConversationId = message.conversationId;
         } else if (!currentConversationId) {
           currentConversationId = message.conversationId;
-          console.log(`Started tracking conversation: ${currentConversationId}`);
+          console.log(
+            `Started tracking conversation: ${currentConversationId}`
+          );
         }
 
         // Convert audio array to buffer and send to transcriber
@@ -113,10 +120,10 @@ export function setupWebSocket(server: Server) {
 
     ws.on('close', async () => {
       console.log('Closing streaming transcript connection');
-      
+
       // Save any remaining transcripts before closing
       await saveTranscripts();
-      
+
       await transcriber.close();
       CONNECTED = false;
       currentConversationId = null;
