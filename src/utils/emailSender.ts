@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransporter({
 	service: "gmail",
 	auth: {
 		user: process.env.EMAIL_USER,
@@ -26,57 +28,76 @@ export async function sendScheduledEmail(
 			timeZoneName: "short",
 		});
 
+		// Load logo as base64
+		let logoBase64 = "";
+		try {
+			const logoPath = join(process.cwd(), "public", "images", "logo.png");
+			const logoData = readFileSync(logoPath);
+			logoBase64 = `data:image/png;base64,${logoData.toString("base64")}`;
+		} catch (logoError) {
+			console.error("Error loading logo:", logoError);
+		}
+
 		const mailOptions = {
-			from: process.env.EMAIL_USER,
+			from: `"NORA Tutoring" <${process.env.EMAIL_USER}>`,
 			to,
-			subject: `Your Nora Tutoring Session: ${title}`,
+			subject: `Your Tutoring Session: ${title}`,
+			text: `Your tutoring session "${title}" is scheduled for ${formattedTime}. Join here: ${callLink}`,
 			html: `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Nora Tutoring Session</title>
+          <title>NORA Tutoring Session</title>
         </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: white;">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 20px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">NORA</h1>
-              <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 16px;">Your AI Tutoring Session</p>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f8f9fa; line-height: 1.6;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            
+            <!-- Header with Logo -->
+            <div style="background-color: #1661ff; padding: 40px 20px; text-align: center;">
+              ${logoBase64 ? `<img src="${logoBase64}" alt="NORA" style="height: 60px; width: auto; display: block; margin: 0 auto;">` : '<div style="color: white; font-size: 32px; font-weight: bold;">NORA</div>'}
+              <p style="color: rgba(255,255,255,0.9); margin: 15px 0 0 0; font-size: 18px; font-weight: 500;">Your AI Tutoring Session</p>
             </div>
             
             <!-- Content -->
             <div style="padding: 40px 30px;">
-              <h2 style="color: #333; margin: 0 0 20px 0; font-size: 24px;">${title}</h2>
-              <p style="color: #666; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">${description}</p>
+              <h1 style="color: #1a1a1a; margin: 0 0 16px 0; font-size: 28px; font-weight: 600; line-height: 1.3;">${title}</h1>
+              <p style="color: #4a5568; font-size: 16px; margin: 0 0 24px 0;">${description}</p>
               
-              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #333; margin: 0 0 10px 0; font-size: 18px;">Session Details</h3>
-                <p style="color: #666; margin: 5px 0; font-size: 16px;"><strong>Date & Time:</strong> ${formattedTime}</p>
+              <!-- Session Details Card -->
+              <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 24px; border-radius: 8px; margin: 24px 0;">
+                <h2 style="color: #2d3748; margin: 0 0 12px 0; font-size: 18px; font-weight: 600;">Session Details</h2>
+                <div style="color: #4a5568; font-size: 16px;">
+                  <strong style="color: #2d3748;">Date & Time:</strong> ${formattedTime}
+                </div>
               </div>
               
               <!-- Call to Action Button -->
               <div style="text-align: center; margin: 40px 0;">
-                <a href="${callLink}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: transform 0.2s;">
+                <a href="${callLink}" style="display: inline-block; background-color: #1661ff; color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(22, 97, 255, 0.3); transition: all 0.2s ease;">
                   Start Meeting
                 </a>
               </div>
               
-              <p style="color: #999; font-size: 14px; text-align: center; margin: 30px 0 0 0;">
-                If the button doesn't work, copy and paste this link into your browser:<br>
-                <a href="${callLink}" style="color: #667eea; word-break: break-all;">${callLink}</a>
-              </p>
+              <!-- Backup Link -->
+              <div style="background-color: #f7fafc; padding: 20px; border-radius: 8px; text-align: center; margin: 24px 0;">
+                <p style="color: #718096; font-size: 14px; margin: 0 0 8px 0;">If the button doesn't work, copy this link:</p>
+                <a href="${callLink}" style="color: #1661ff; font-size: 14px; word-break: break-all; text-decoration: none;">${callLink}</a>
+              </div>
             </div>
             
             <!-- Footer -->
-            <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-              <p style="color: #999; font-size: 12px; margin: 0;">
+            <div style="background-color: #f7fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="color: #718096; font-size: 12px; margin: 0; line-height: 1.5;">
                 This email was sent by NORA AI Tutoring System.<br>
                 Please join your session on time for the best experience.
               </p>
             </div>
           </div>
+          
+          <!-- Spacer for email clients -->
+          <div style="height: 40px;"></div>
         </body>
         </html>
       `,

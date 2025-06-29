@@ -2,16 +2,16 @@ import { supabase } from "../lib/supabase.js";
 import { sendScheduledEmail } from "../utils/emailSender.js";
 
 export function startEmailScheduler() {
-	// Check for due sessions every minute
+	// Check for due sessions every 2 minutes to reduce database load
 	const interval = setInterval(async () => {
 		try {
 			await processScheduledSessions();
 		} catch (error) {
 			console.error("Error in email scheduler:", error);
 		}
-	}, 60000); // 60 seconds
+	}, 120000); // 2 minutes
 
-	console.log("Email scheduler started - checking every minute");
+	console.log("Email scheduler started - checking every 2 minutes");
 
 	// Return cleanup function
 	return () => {
@@ -22,9 +22,10 @@ export function startEmailScheduler() {
 
 async function processScheduledSessions() {
 	try {
-		// Get all scheduled sessions that are due (within next 5 minutes)
+		// Get sessions that are due in exactly 10 minutes (single notification window)
 		const now = new Date();
-		const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60000);
+		const tenMinutesFromNow = new Date(now.getTime() + 10 * 60000);
+		const eightMinutesFromNow = new Date(now.getTime() + 8 * 60000);
 
 		const { data: dueSessions, error } = await supabase
 			.from("sessions")
@@ -40,8 +41,8 @@ async function processScheduledSessions() {
       `
 			)
 			.eq("status", "SCHEDULED")
-			.gte("scheduled_time", now.toISOString())
-			.lte("scheduled_time", fiveMinutesFromNow.toISOString());
+			.gte("scheduled_time", eightMinutesFromNow.toISOString())
+			.lte("scheduled_time", tenMinutesFromNow.toISOString());
 
 		if (error) {
 			console.error("Error fetching due sessions:", error);
@@ -65,7 +66,7 @@ async function processScheduledSessions() {
 					session.scheduled_time
 				);
 
-				// Update status in database
+				// Update status to prevent duplicate emails
 				const { error: updateError } = await supabase
 					.from("sessions")
 					.update({
@@ -82,7 +83,7 @@ async function processScheduledSessions() {
 			} catch (error) {
 				console.error(`Error processing session ${session.id}:`, error);
 
-				// Mark as failed
+				// Mark as failed to prevent retries
 				await supabase
 					.from("sessions")
 					.update({ status: "EMAIL_FAILED" })
