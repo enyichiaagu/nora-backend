@@ -59,7 +59,7 @@ async function processScheduledSessions() {
 		// Process each due session
 		for (const session of dueSessions) {
 			try {
-				const success = await sendScheduledEmail(
+				await sendScheduledEmail(
 					session.profile[0].email,
 					session.title,
 					session.description,
@@ -68,28 +68,9 @@ async function processScheduledSessions() {
 					session.tutor
 				);
 
-				// Update status to prevent duplicate emails
-				const { error: updateError } = await supabase
-					.from("sessions")
-					.update({
-						status: success ? "EMAIL_SENT" : "EMAIL_FAILED",
-					})
-					.eq("id", session.id);
-
-				if (updateError) {
-					console.error(
-						"Error updating session status:",
-						updateError
-					);
-				}
+				console.log(`Email sent for session ${session.id}`);
 			} catch (error) {
 				console.error(`Error processing session ${session.id}:`, error);
-
-				// Mark as failed to prevent retries
-				await supabase
-					.from("sessions")
-					.update({ status: "EMAIL_FAILED" })
-					.eq("id", session.id);
 			}
 		}
 	} catch (error) {
