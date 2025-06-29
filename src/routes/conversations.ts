@@ -23,8 +23,6 @@ router.post("/", async (req, res) => {
 
 		const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-		`Generate a lesson title using exactly 4 words and a lesson description using exactly 9 words for a tutoring session about [TOPIC]. The title should be clear and engaging, and the description should explain what the student will learn. Provide only the title and description, separated by a line break.`;
-
 		// Generate title
 		const titlePrompt = `Based on the following conversation context, a lesson description using exactly 9 words for a tutoring session about. The description should explain what the student will learn from the subject:
 
