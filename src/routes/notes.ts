@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { supabase } from "../lib/supabase.js";
-import { jsPDF, type jsPDFOptions } from "jspdf";
+import { jsPDF } from "jspdf";
 import { readFileSync } from "fs";
 import { join } from "path";
+import autoTable from "jspdf-autotable";
 
 const router = Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -40,7 +41,7 @@ router.get("/:id", async (req, res) => {
 		const model = genAI.getGenerativeModel({
 			model: "gemini-2.5-flash",
 		});
-		const prompt = `Based on the following transcripts, create review notes of the subject of discussion that is presented in paragraphs (exactly 300 words for the entire review notes). Generate lesson notes on the topic use these breaks (separate paragraphs with \n\n). The notes are like lesson notes that a person can read to understand the subject of discussion better. Do not include any headers, titles, or "Study Notes:" labels - just provide the content in the paragraphs:
+		const prompt = `Based on the following transcripts, create review notes of the subject of discussion that is presented in paragraphs (exactly 500 words for the entire review notes). Generate lesson notes on the topic use these breaks (separate paragraphs with \\n\\n). The notes are like lesson notes that a person can read to understand the subject of discussion better. Do not include any headers, titles, or "Study Notes:" labels - just provide the content in the paragraphs:
 
 Transcripts:
 ${session.notes}`;
@@ -51,8 +52,57 @@ ${session.notes}`;
 		// Create PDF
 		const doc = new jsPDF();
 		const pageWidth = doc.internal.pageSize.getWidth();
+		const pageHeight = doc.internal.pageSize.getHeight();
 		const margin = 20;
 		const maxWidth = pageWidth - margin * 2;
+		const footerHeight = 25; // Reserve space for footer
+		const titleText = session.title || "Untitled Session";
+
+		// Function to add the footer to each page
+		const addFooter = (pageNum: number) => {
+			// Save the current state
+			const currentFontSize = doc.getFontSize();
+			const currentFont = doc.getFont();
+			const currentTextColor = doc.getTextColor();
+
+			// Set footer styles
+			doc.setFontSize(10);
+			doc.setFont("Helvetica", "italic");
+			doc.setTextColor(100, 100, 100); // Light grey for footer
+
+			// Get current date/time info
+			const currentDate = new Date();
+			const readableDate = currentDate.toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			});
+			const readableTime = currentDate.toLocaleTimeString("en-US", {
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: true,
+			});
+
+			const topic = titleText;
+			const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${readableDate} at ${readableTime}.`;
+
+			const footerLines = doc.splitTextToSize(footerText, maxWidth);
+			doc.text(footerLines, pageWidth / 2, pageHeight - 15, {
+				align: "center",
+			});
+
+			// Add page number if there are multiple pages
+			doc.setFontSize(9);
+			doc.text(`Page ${pageNum}`, pageWidth - margin, pageHeight - 10);
+
+			// Restore the state
+			doc.setFontSize(currentFontSize);
+			doc.setFont(currentFont.fontName, currentFont.fontStyle);
+			doc.setTextColor(currentTextColor);
+		};
+
+		// Initialize first page
+		let pageNum = 1;
 
 		// Load and add logo
 		try {
@@ -84,72 +134,72 @@ ${session.notes}`;
 		doc.setFontSize(23);
 		doc.setFont("Helvetica", "bold");
 		doc.setTextColor(50, 50, 50);
-		const titleText = session.title || "Untitled Session";
 		doc.text(titleText, pageWidth / 2, 60, { align: "center" });
 
 		// Description with grey color
 		doc.setFontSize(12);
 		doc.setFont("Helvetica", "normal");
 		doc.setTextColor(80, 80, 80); // Dark grey color
+		let bodyStartY = 75;
+
 		if (session.description) {
 			const descLines = doc.splitTextToSize(
 				session.description,
 				maxWidth
 			);
 			doc.text(descLines, pageWidth / 2, 68, { align: "center" });
+			bodyStartY = 85; // Adjust starting position if description exists
 		}
 
-		// Reset text color to black for body
-		doc.setTextColor(0, 0, 0);
+		// Add a little extra space
+		let currentY = bodyStartY;
 
-		// Study notes body with paragraph spacing
+		// Split the study notes into paragraphs
+		const paragraphs = studyNotes.split("\\n\\n").filter((p) => p.trim());
+
+		// Study notes body with paragraph spacing and page management
 		doc.setFontSize(13);
 		doc.setFont("Helvetica", "normal");
 		doc.setTextColor(50, 50, 50);
-		const bodyStartY = session.description ? 85 : 75;
 
-		// Split the study notes into paragraphs and add spacing between them
-		const paragraphs = studyNotes.split("\n\n").filter((p) => p.trim());
-		let currentY = bodyStartY;
+		// Line height and spacing values
+		const lineHeight = 7;
+		const paragraphSpacing = 8;
+		const maxY = pageHeight - footerHeight; // Maximum Y position before footer
 
+		// Process each paragraph
 		paragraphs.forEach((paragraph, index) => {
+			// Split text to respect max width
 			const paragraphLines = doc.splitTextToSize(
 				paragraph.trim(),
 				maxWidth
-				// { align: "justify" }
 			);
+			const paragraphHeight = paragraphLines.length * lineHeight;
 
+			// Check if we need a new page
+			if (currentY + paragraphHeight > maxY) {
+				// Add footer to current page
+				addFooter(pageNum);
+
+				// Add new page
+				doc.addPage();
+				pageNum++;
+				currentY = margin + 10; // Reset Y position with some padding at top
+			}
+
+			// Render paragraph with justified text
 			doc.text(paragraphLines, margin, currentY, {
+				align: "justify",
 				lineHeightFactor: 1.4,
-				// align: "justify",
+				maxWidth: maxWidth,
 			});
 
-			// Use the same factor in height calculation
-			const paragraphHeight = paragraphLines.length * 6;
-			currentY += paragraphHeight + 8;
+			// Move Y position for next paragraph
+			currentY += paragraphHeight + paragraphSpacing;
 		});
 
-		// Footer with current date and time
-		const currentDate = new Date();
-		const readableDate = currentDate.toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-		const readableTime = currentDate.toLocaleTimeString("en-US", {
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: true,
-		});
-
-		const topic = session.title || "this topic";
-		const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${readableDate} at ${readableTime}.`;
-
-		doc.setFontSize(12);
-		doc.setFont("Helvetica", "italic");
-		doc.setTextColor(100, 100, 100); // Light grey for footer
-		const footerLines = doc.splitTextToSize(footerText, maxWidth);
-		doc.text(footerLines, pageWidth / 2, 270, { align: "center" });
+		// Add footer to the last page
+		addFooter(pageNum);
 
 		// Send PDF
 		const pdfBuffer = doc.output("arraybuffer");
