@@ -71,9 +71,9 @@ Study Notes:`;
       doc.text('NORA', pageWidth / 2, 30, { align: 'center' });
     }
 
-    // Session title (using Times as it's closer to marlin-soft style)
+    // Session title
     doc.setFontSize(18);
-    doc.setFont('times', 'bold');
+    doc.setFont('Helvetica', 'bold');
     const titleText = session.title || 'Untitled Session';
     doc.text(titleText, pageWidth / 2, 60, { align: 'center' });
 
