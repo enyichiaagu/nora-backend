@@ -4,7 +4,6 @@ import { supabase } from "../lib/supabase.js";
 import { jsPDF } from "jspdf";
 import { readFileSync } from "fs";
 import { join } from "path";
-import autoTable from "jspdf-autotable";
 
 const router = Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -55,7 +54,7 @@ ${session.notes}`;
 		const pageHeight = doc.internal.pageSize.getHeight();
 		const margin = 20;
 		const maxWidth = pageWidth - margin * 2;
-		const footerHeight = 25; // Reserve space for footer
+		const footerHeight = 30; // Reserve space for footer
 		const titleText = session.title || "Untitled Session";
 
 		// Function to add the footer to each page
@@ -86,12 +85,21 @@ ${session.notes}`;
 			const topic = titleText;
 			const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${readableDate} at ${readableTime}.`;
 
+			// Draw a light grey line above footer
+			doc.setDrawColor(200, 200, 200);
+			doc.line(
+				margin,
+				pageHeight - footerHeight + 5,
+				pageWidth - margin,
+				pageHeight - footerHeight + 5
+			);
+
 			const footerLines = doc.splitTextToSize(footerText, maxWidth);
-			doc.text(footerLines, pageWidth / 2, pageHeight - 15, {
+			doc.text(footerLines, pageWidth / 2, pageHeight - 20, {
 				align: "center",
 			});
 
-			// Add page number if there are multiple pages
+			// Add page number
 			doc.setFontSize(9);
 			doc.text(`Page ${pageNum}`, pageWidth - margin, pageHeight - 10);
 
@@ -99,6 +107,14 @@ ${session.notes}`;
 			doc.setFontSize(currentFontSize);
 			doc.setFont(currentFont.fontName, currentFont.fontStyle);
 			doc.setTextColor(currentTextColor);
+		};
+
+		// Function to start a new page
+		const addNewPage = () => {
+			addFooter(pageNum);
+			doc.addPage();
+			pageNum++;
+			return margin + 10; // Return new Y position
 		};
 
 		// Initialize first page
@@ -157,7 +173,7 @@ ${session.notes}`;
 		// Split the study notes into paragraphs
 		const paragraphs = studyNotes.split("\\n\\n").filter((p) => p.trim());
 
-		// Study notes body with paragraph spacing and page management
+		// Study notes body with line-by-line management
 		doc.setFontSize(13);
 		doc.setFont("Helvetica", "normal");
 		doc.setTextColor(50, 50, 50);
@@ -165,37 +181,34 @@ ${session.notes}`;
 		// Line height and spacing values
 		const lineHeight = 7;
 		const paragraphSpacing = 8;
-		const maxY = pageHeight - footerHeight; // Maximum Y position before footer
+		const safeAreaBottom = pageHeight - footerHeight; // Safe area for content
 
-		// Process each paragraph
-		paragraphs.forEach((paragraph, index) => {
-			// Split text to respect max width
-			const paragraphLines = doc.splitTextToSize(
-				paragraph.trim(),
-				maxWidth
-			);
-			const paragraphHeight = paragraphLines.length * lineHeight;
+		// Process each paragraph with line-by-line control
+		paragraphs.forEach((paragraph, paragraphIndex) => {
+			// Split text into lines that fit the width
+			const lines = doc.splitTextToSize(paragraph.trim(), maxWidth);
 
-			// Check if we need a new page
-			if (currentY + paragraphHeight > maxY) {
-				// Add footer to current page
-				addFooter(pageNum);
+			// Process each line
+			for (let i = 0; i < lines.length; i++) {
+				// Check if we need a new page
+				if (currentY + lineHeight > safeAreaBottom) {
+					currentY = addNewPage();
+				}
 
-				// Add new page
-				doc.addPage();
-				pageNum++;
-				currentY = margin + 10; // Reset Y position with some padding at top
+				// Add the line
+				doc.text(lines[i], margin, currentY, { align: "justify" });
+				currentY += lineHeight;
 			}
 
-			// Render paragraph with justified text
-			doc.text(paragraphLines, margin, currentY, {
-				align: "justify",
-				lineHeightFactor: 1.4,
-				maxWidth: maxWidth,
-			});
+			// Add paragraph spacing (unless it's the last paragraph)
+			if (paragraphIndex < paragraphs.length - 1) {
+				currentY += paragraphSpacing;
 
-			// Move Y position for next paragraph
-			currentY += paragraphHeight + paragraphSpacing;
+				// If adding paragraph spacing would push us beyond the safe area, start a new page
+				if (currentY > safeAreaBottom) {
+					currentY = addNewPage();
+				}
+			}
 		});
 
 		// Add footer to the last page
