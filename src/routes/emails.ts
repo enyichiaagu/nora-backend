@@ -24,7 +24,8 @@ router.get("/", async (req, res) => {
       "Test Tutoring Session",
       "This is a test email for the scheduled tutoring session functionality.",
       "https://noratutor.xyz/session/call/s123456789012345",
-      new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour from now
+      new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+      "Dr. Smith" // Test tutor name
     );
 
     if (success) {
