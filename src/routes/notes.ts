@@ -79,7 +79,7 @@ Study Notes:`;
 
     // Description
     doc.setFontSize(12);
-    doc.setFont('times', 'italic');
+    doc.setFont('Helvetica', 'italic');
     if (session.description) {
       const descLines = doc.splitTextToSize(session.description, maxWidth);
       doc.text(descLines, pageWidth / 2, 70, { align: 'center' });
