@@ -89,7 +89,7 @@ ${session.notes}`;
 
     // Study notes body with paragraph spacing
     doc.setFontSize(15);
-    doc.setFont('times', 'normal');
+    doc.setFont('Helvetica', 'normal');
     const bodyStartY = session.description ? 85 : 75;
     
     // Split the study notes into paragraphs and add spacing between them
