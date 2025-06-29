@@ -77,7 +77,7 @@ ${session.notes}`;
 
     // Description with grey color
     doc.setFontSize(14);
-    doc.setFont('times', 'normal');
+    doc.setFont('Helvetica', 'normal');
     doc.setTextColor(80, 80, 80); // Dark grey color
     if (session.description) {
       const descLines = doc.splitTextToSize(session.description, maxWidth);
