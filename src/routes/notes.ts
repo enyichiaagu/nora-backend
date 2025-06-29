@@ -4,7 +4,6 @@ import { supabase } from "../lib/supabase.js";
 import { jsPDF } from "jspdf";
 import { readFileSync } from "fs";
 import { join } from "path";
-import autoTable from "jspdf-autotable";
 
 const router = Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
