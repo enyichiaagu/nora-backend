@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { generateEmailTemplate, type EmailTemplateData } from "./emailTemplate.js";
 
-const transporter = nodemailer.createTransporter({ // Don't change this line to createTransporter
+const transporter = nodemailer.createTransport({ // Don't change this line to createTransporter
 	service: "gmail",
 	auth: {
 		user: process.env.EMAIL_USER,
