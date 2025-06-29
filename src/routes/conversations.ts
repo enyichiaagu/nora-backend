@@ -24,14 +24,14 @@ router.post("/", async (req, res) => {
 		const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 		// Generate title
-		const titlePrompt = `Based on the following conversation context, a lesson description using exactly 9 words for a tutoring session about. The description should explain what the student will learn from the subject:
+		const titlePrompt = `Based on the following conversation context, a lesson description using exactly 4 words for a tutoring session about. The description should explain what the student will learn from the subject:
 
 Context: ${conversational_context}
 
 Title:`;
 
 		// Generate description
-		const descriptionPrompt = `Based on the following conversation context, generate a short description (1 sentence) that summarizes what the user woll learn from the discussion. Make it at most 10 words:
+		const descriptionPrompt = `Based on the following conversation context, generate a short description (1 sentence) that summarizes what the user will learn from the discussion. Make it 9 words:
 
 Context: ${conversational_context}
 
