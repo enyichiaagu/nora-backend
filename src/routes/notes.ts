@@ -64,8 +64,8 @@ ${session.notes}`;
     } catch (logoError) {
       console.error('Error loading logo:', logoError);
       // Fallback to text if logo fails
-      doc.setFontSize(16);
-      doc.setFont('times', 'bold');
+      doc.setFontSize(20);
+      doc.setFont('Helvetica', 'bold');
       doc.text('NORA', pageWidth / 2, 30, { align: 'center' });
     }
 
