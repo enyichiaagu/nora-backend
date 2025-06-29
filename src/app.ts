@@ -6,8 +6,9 @@ import { setupWebSocket } from "./websocket/transcriptHandler.js";
 import { pingRouter } from "./routes/ping.js";
 import { conversationRouter } from "./routes/conversations.js";
 import { notesRouter } from "./routes/notes.js";
-import { emailSchedulerRouter } from "./routes/emailScheduler.js";
-// import { startEmailScheduler } from './scheduler/emailScheduler.js';
+import { schedulesRouter } from "./routes/schedules.js";
+import { emailsRouter } from "./routes/emails.js";
+import { startEmailScheduler } from './services/emailScheduler.js';
 
 const app = express();
 const server = createServer(app);
@@ -20,18 +21,19 @@ app.use(express.json());
 app.use("/ping", pingRouter);
 app.use("/conversations", conversationRouter);
 app.use("/notes", notesRouter);
-app.use("/schedule-email", emailSchedulerRouter);
+app.use("/schedules", schedulesRouter);
+app.use("/emails", emailsRouter);
 
 // WebSocket setup
 setupWebSocket(server);
 
 // Start email scheduler
-// const stopEmailScheduler = startEmailScheduler();
+const stopEmailScheduler = startEmailScheduler();
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
 	console.log("SIGTERM received, shutting down gracefully");
-	// stopEmailScheduler();
+	stopEmailScheduler();
 	server.close(() => {
 		console.log("Server closed");
 		process.exit(0);
