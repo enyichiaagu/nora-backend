@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../lib/supabase.js';
-import '../lib/marlin-soft-normal.js'
+import '../lib/marlin-soft-normal.ts'
 import { jsPDF } from 'jspdf';
 import { readFileSync } from 'fs';
 import { join } from 'path';
