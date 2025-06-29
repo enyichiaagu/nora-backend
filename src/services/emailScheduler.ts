@@ -22,7 +22,7 @@ export function startEmailScheduler() {
 
 async function processScheduledSessions() {
 	try {
-		// Get sessions that are due in exactly 10 minutes (single notification window)
+		// Get sessions that are due in exactly 8-10 minutes (single notification window)
 		const now = new Date();
 		const tenMinutesFromNow = new Date(now.getTime() + 10 * 60000);
 		const eightMinutesFromNow = new Date(now.getTime() + 8 * 60000);
@@ -37,6 +37,7 @@ async function processScheduledSessions() {
         description,
         call_link,
         scheduled_time,
+        tutor,
         profile!inner(email)
       `
 			)
@@ -63,7 +64,8 @@ async function processScheduledSessions() {
 					session.title,
 					session.description,
 					session.call_link,
-					session.scheduled_time
+					session.scheduled_time,
+					session.tutor
 				);
 
 				// Update status to prevent duplicate emails

@@ -19,12 +19,14 @@ router.get("/", async (req, res) => {
       `);
     }
 
+    // Use exact same template that users receive
     const success = await sendScheduledEmail(
       testEmail,
-      "Test Tutoring Session",
-      "This is a test email for the scheduled tutoring session functionality.",
-      "https://noratutor.xyz/session/call/s123456789012345",
-      new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour from now
+      "Advanced Calculus Integration Techniques", // Test title
+      "Learn integration by parts and substitution methods for complex functions.", // Test description
+      "https://noratutor.xyz/session/call/s123456789012345", // Test call link
+      new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+      "Dr. Sarah Johnson" // Test tutor name
     );
 
     if (success) {
@@ -34,7 +36,7 @@ router.get("/", async (req, res) => {
             <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;">
               <h1 style="color: #28a745; margin-bottom: 20px;">✅ Email Sent</h1>
               <p style="color: #666; font-size: 16px;">Test email has been successfully sent to ${testEmail}</p>
-              <p style="color: #999; font-size: 14px; margin-top: 30px;">Check your inbox for the test tutoring session email.</p>
+              <p style="color: #999; font-size: 14px; margin-top: 30px;">This is the exact same template that users receive for their scheduled sessions.</p>
             </div>
           </body>
         </html>
