@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
 
     // Generate study notes using Gemini
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
-    const prompt = `Based on the following transcripts, create concise study notes that must be in at least  2 well-structured paragraphs (maximum 400 words). Focus only on the content from the transcripts and organize key points in flowing paragraphs with clear paragraph breaks (seperate paragraphs with \n\n). Make sure to separate different topics or concepts into distinct paragraphs. Do not include any headers, titles, or "Study Notes:" labels - just provide the content in the paragraphs:
+    const prompt = `Based on the following transcripts, create review notes of the subject of discussion that is presented in short paragraphs (maximum 250 words for the entire review notes). Focus only on the content from the transcripts and use these breaks (separate paragraphs with \n\n). Make sure to make the paragraphs short and easily digestible. Do not include any headers, titles, or "Study Notes:" labels - just provide the content in the paragraphs:
 
 Transcripts:
 ${session.notes}`;
