@@ -88,7 +88,7 @@ ${session.notes}`;
     doc.setTextColor(0, 0, 0);
 
     // Study notes body with paragraph spacing
-    doc.setFontSize(12);
+    doc.setFontSize(15);
     doc.setFont('times', 'normal');
     const bodyStartY = session.description ? 85 : 75;
     
