@@ -6,8 +6,8 @@ import { setupWebSocket } from "./websocket/transcriptHandler.js";
 import { pingRouter } from "./routes/ping.js";
 import { conversationRouter } from "./routes/conversations.js";
 import { notesRouter } from "./routes/notes.js";
-// import { emailSchedulerRouter } from './routes/emailScheduler.js';
-// import { startEmailScheduler } from "./scheduler/emailScheduler.js";
+import { emailSchedulerRouter } from "./routes/emailScheduler.js";
+// import { startEmailScheduler } from './scheduler/emailScheduler.js';
 
 const app = express();
 const server = createServer(app);
@@ -20,7 +20,7 @@ app.use(express.json());
 app.use("/ping", pingRouter);
 app.use("/conversations", conversationRouter);
 app.use("/notes", notesRouter);
-// app.use('/schedule-email', emailSchedulerRouter);
+app.use("/schedule-email", emailSchedulerRouter);
 
 // WebSocket setup
 setupWebSocket(server);
