@@ -122,8 +122,8 @@ ${session.notes}`;
     const topic = session.title || 'this topic';
     const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${readableDate} at ${readableTime}.`;
     
-    doc.setFontSize(10);
-    doc.setFont('times', 'italic');
+    doc.setFontSize(13);
+    doc.setFont('Helvetica', 'italic');
     doc.setTextColor(100, 100, 100); // Light grey for footer
     const footerLines = doc.splitTextToSize(footerText, maxWidth);
     doc.text(footerLines, pageWidth / 2, 270, { align: 'center' });
