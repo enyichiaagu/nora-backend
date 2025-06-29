@@ -55,7 +55,7 @@ ${session.notes}`;
       const logoPath = join(process.cwd(), 'public', 'images', 'logo.png');
       const logoData = readFileSync(logoPath);
       const logoBase64 = `data:image/png;base64,${logoData.toString('base64')}`;
-      
+
       // Add logo centered at top
       const logoWidth = 60;
       const logoHeight = 20;
@@ -91,19 +91,18 @@ ${session.notes}`;
     doc.setFontSize(15);
     doc.setFont('Helvetica', 'normal');
     const bodyStartY = session.description ? 85 : 75;
-    
+
     // Split the study notes into paragraphs and add spacing between them
-    const paragraphs = studyNotes.split('\n\n').filter(p => p.trim());
+    const paragraphs = studyNotes.split('\n\n').filter((p) => p.trim());
     let currentY = bodyStartY;
-    const lineHeight = 6; // Increased line spacing
-    
+
     paragraphs.forEach((paragraph, index) => {
       const paragraphLines = doc.splitTextToSize(paragraph.trim(), maxWidth);
       doc.text(paragraphLines, margin, currentY, { lineHeightFactor: 1.4 });
-      
-      // Calculate the height of this paragraph and add spacing
-      const paragraphHeight = paragraphLines.length * lineHeight;
-      currentY += paragraphHeight + 8; // Add extra space between paragraphs
+
+      // Use the same factor in height calculation
+      const paragraphHeight = paragraphLines.length * 7;
+      currentY += paragraphHeight + 8;
     });
 
     // Footer with current date and time
@@ -111,17 +110,17 @@ ${session.notes}`;
     const readableDate = currentDate.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
     const readableTime = currentDate.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     });
-    
+
     const topic = session.title || 'this topic';
     const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${readableDate} at ${readableTime}.`;
-    
+
     doc.setFontSize(13);
     doc.setFont('Helvetica', 'italic');
     doc.setTextColor(100, 100, 100); // Light grey for footer
@@ -134,7 +133,10 @@ ${session.notes}`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${titleText.toLowerCase().split(' ').join('_')}-${id}.pdf"`
+      `attachment; filename="${titleText
+        .toLowerCase()
+        .split(' ')
+        .join('_')}-${id}.pdf"`
     );
     res.send(Buffer.from(pdfBuffer));
   } catch (error) {
