@@ -67,7 +67,7 @@ Study Notes:`;
       console.error('Error loading logo:', logoError);
       // Fallback to text if logo fails
       doc.setFontSize(16);
-      doc.setFont('Helvetica-Bold', 'normal');
+      doc.setFont('Helvetica', 'bold');
       doc.text('NORA', pageWidth / 2, 30, { align: 'center' });
     }
 
