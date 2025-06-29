@@ -101,7 +101,7 @@ Study Notes:`;
     const topic = session.title || 'this topic';
     const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${currentDate}`;
     
-    doc.setFontSize(9);
+    doc.setFontSize(12);
     doc.setFont('times', 'italic');
     const footerLines = doc.splitTextToSize(footerText, maxWidth);
     doc.text(footerLines, pageWidth / 2, 270, { align: 'center' });
