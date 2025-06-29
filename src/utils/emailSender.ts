@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
 	service: "gmail",
 	auth: {
 		user: process.env.EMAIL_USER,
@@ -31,7 +31,12 @@ export async function sendScheduledEmail(
 		// Load logo as base64
 		let logoBase64 = "";
 		try {
-			const logoPath = join(process.cwd(), "public", "images", "logo.png");
+			const logoPath = join(
+				process.cwd(),
+				"public",
+				"images",
+				"logo.png"
+			);
 			const logoData = readFileSync(logoPath);
 			logoBase64 = `data:image/png;base64,${logoData.toString("base64")}`;
 		} catch (logoError) {
@@ -56,7 +61,11 @@ export async function sendScheduledEmail(
             
             <!-- Header with Logo -->
             <div style="background-color: #1661ff; padding: 40px 20px; text-align: center;">
-              ${logoBase64 ? `<img src="${logoBase64}" alt="NORA" style="height: 60px; width: auto; display: block; margin: 0 auto;">` : '<div style="color: white; font-size: 32px; font-weight: bold;">NORA</div>'}
+              ${
+					logoBase64
+						? `<img src="${logoBase64}" alt="NORA" style="height: 60px; width: auto; display: block; margin: 0 auto;">`
+						: '<div style="color: white; font-size: 32px; font-weight: bold;">NORA</div>'
+				}
               <p style="color: rgba(255,255,255,0.9); margin: 15px 0 0 0; font-size: 18px; font-weight: 500;">Your AI Tutoring Session</p>
             </div>
             
