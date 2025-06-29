@@ -112,7 +112,7 @@ Study Notes:`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="notes-${id}.pdf"`
+      `attachment; filename="${titleText.toLowerCase().split(' ').join('_')}-${id}.pdf"`
     );
     res.send(Buffer.from(pdfBuffer));
   } catch (error) {
