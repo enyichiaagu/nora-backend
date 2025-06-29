@@ -1,36 +1,36 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransporter({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+const transporter = nodemailer.createTransport({
+	service: "gmail",
+	auth: {
+		user: process.env.EMAIL_USER,
+		pass: process.env.EMAIL_PASS,
+	},
 });
 
 export async function sendScheduledEmail(
-  to: string,
-  title: string,
-  description: string,
-  callLink: string,
-  scheduledTime: string
+	to: string,
+	title: string,
+	description: string,
+	callLink: string,
+	scheduledTime: string
 ): Promise<boolean> {
-  try {
-    const formattedTime = new Date(scheduledTime).toLocaleString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    });
+	try {
+		const formattedTime = new Date(scheduledTime).toLocaleString("en-US", {
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			timeZoneName: "short",
+		});
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to,
-      subject: `Your Nora Tutoring Session: ${title}`,
-      html: `
+		const mailOptions = {
+			from: process.env.EMAIL_USER,
+			to,
+			subject: `Your Nora Tutoring Session: ${title}`,
+			html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -80,13 +80,13 @@ export async function sendScheduledEmail(
         </body>
         </html>
       `,
-    };
+		};
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Scheduled email sent successfully to ${to}`);
-    return true;
-  } catch (error) {
-    console.error('Error sending scheduled email:', error);
-    return false;
-  }
+		await transporter.sendMail(mailOptions);
+		console.log(`Scheduled email sent successfully to ${to}`);
+		return true;
+	} catch (error) {
+		console.error("Error sending scheduled email:", error);
+		return false;
+	}
 }

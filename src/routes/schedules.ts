@@ -16,14 +16,23 @@ router.post("/", async (req, res) => {
 			tutor_image,
 			personal_id,
 			tutor_personality,
-			scheduled_time
+			scheduled_time,
 		} = req.body;
 
 		// Validate required fields
-		if (!userId || !duration || !conversation_context || !tutor || !replica_id || 
-			!tutor_image || !personal_id || !tutor_personality || !scheduled_time) {
+		if (
+			!userId ||
+			!duration ||
+			!conversation_context ||
+			!tutor ||
+			!replica_id ||
+			!tutor_image ||
+			!personal_id ||
+			!tutor_personality ||
+			!scheduled_time
+		) {
 			return res.status(400).json({
-				error: "All fields are required: userId, duration, conversation_context, tutor, replica_id, tutor_image, personal_id, tutor_personality, scheduled_time"
+				error: "All fields are required: userId, duration, conversation_context, tutor, replica_id, tutor_image, personal_id, tutor_personality, scheduled_time",
 			});
 		}
 
@@ -31,31 +40,33 @@ router.post("/", async (req, res) => {
 		const scheduledDate = new Date(scheduled_time);
 		if (scheduledDate <= new Date()) {
 			return res.status(400).json({
-				error: "Scheduled time must be in the future"
+				error: "Scheduled time must be in the future",
 			});
 		}
 
 		// Get user email from profiles table
 		const { data: profile, error: profileError } = await supabase
-			.from("profiles")
+			.from("profile")
 			.select("email")
 			.eq("id", userId)
 			.single();
 
 		if (profileError || !profile) {
 			return res.status(404).json({
-				error: "User not found"
+				error: "User not found",
 			});
 		}
 
 		if (!profile.email) {
 			return res.status(400).json({
-				error: "User email not found"
+				error: "User email not found",
 			});
 		}
 
 		// Generate title and description
-		const { title, description } = await generateTitleAndDescription(conversation_context);
+		const { title, description } = await generateTitleAndDescription(
+			conversation_context
+		);
 
 		// Generate call link with 15 character ID
 		const sessionId = nanoid(15);
@@ -77,7 +88,7 @@ router.post("/", async (req, res) => {
 				personal_id,
 				description,
 				tutor_personality,
-				call_link
+				call_link,
 			})
 			.select()
 			.single();
@@ -85,7 +96,7 @@ router.post("/", async (req, res) => {
 		if (sessionError) {
 			console.error("Error creating session:", sessionError);
 			return res.status(500).json({
-				error: "Failed to create session"
+				error: "Failed to create session",
 			});
 		}
 
@@ -99,14 +110,14 @@ router.post("/", async (req, res) => {
 				duration: session.duration,
 				title: session.title,
 				description: session.description,
-				call_link: session.call_link
+				call_link: session.call_link,
 			},
-			user_email: profile.email
+			user_email: profile.email,
 		});
 	} catch (error) {
 		console.error("Error in schedules route:", error);
 		res.status(500).json({
-			error: "Internal server error"
+			error: "Internal server error",
 		});
 	}
 });
