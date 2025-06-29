@@ -2,37 +2,41 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 export interface EmailTemplateData {
-  title: string;
-  description: string;
-  callLink: string;
-  scheduledTime: string;
-  tutorName: string;
+	title: string;
+	description: string;
+	callLink: string;
+	scheduledTime: string;
+	tutorName: string;
 }
 
-export function generateEmailTemplate(data: EmailTemplateData): { html: string; text: string; logoBase64?: string } {
-  const formattedTime = new Date(data.scheduledTime).toLocaleString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
+export function generateEmailTemplate(data: EmailTemplateData): {
+	html: string;
+	text: string;
+	logoBase64?: string;
+} {
+	const formattedTime = new Date(data.scheduledTime).toLocaleString("en-US", {
+		weekday: "long",
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+		timeZoneName: "short",
+	});
 
-  // Load logo as base64 with proper error handling
-  let logoBase64 = "";
-  try {
-    const logoPath = join(process.cwd(), "public", "images", "logo.png");
-    const logoData = readFileSync(logoPath);
-    logoBase64 = `data:image/png;base64,${logoData.toString("base64")}`;
-  } catch (logoError) {
-    console.error("Error loading logo:", logoError);
-  }
+	// Load logo as base64 with proper error handling
+	let logoBase64 = "";
+	try {
+		const logoPath = join(process.cwd(), "public", "images", "logo.png");
+		const logoData = readFileSync(logoPath);
+		logoBase64 = `data:image/png;base64,${logoData.toString("base64")}`;
+	} catch (logoError) {
+		console.error("Error loading logo:", logoError);
+	}
 
-  const textVersion = `Your tutoring session "${data.title}" with ${data.tutorName} is scheduled for ${formattedTime}. Description: ${data.description}. Join here: ${data.callLink}`;
+	const textVersion = `Your tutoring session "${data.title}" with ${data.tutorName} is scheduled for ${formattedTime}. Description: ${data.description}. Join here: ${data.callLink}`;
 
-  const htmlVersion = `
+	const htmlVersion = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,7 +67,7 @@ export function generateEmailTemplate(data: EmailTemplateData): { html: string; 
           <!-- Header with Logo -->
           <tr>
             <td style="background-color: #1661ff; padding: 40px 20px; text-align: center;">
-              <p style="color: rgba(255,255,255,0.9); margin: 15px 0 0 0; font-size: 20px; font-weight: 500;">Nora AI/p>
+              <p style="color: rgba(255,255,255,0.9); margin: 15px 0 0 0; font-size: 60px; font-weight: 500;">Nora AI</p>
             </td>
           </tr>
           
@@ -134,9 +138,9 @@ export function generateEmailTemplate(data: EmailTemplateData): { html: string; 
 </html>
   `;
 
-  return {
-    html: htmlVersion,
-    text: textVersion,
-    logoBase64: logoBase64 || undefined
-  };
+	return {
+		html: htmlVersion,
+		text: textVersion,
+		logoBase64: logoBase64 || undefined,
+	};
 }
