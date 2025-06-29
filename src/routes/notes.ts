@@ -71,7 +71,7 @@ ${session.notes}`;
 
     // Session title
     doc.setFontSize(18);
-    doc.setFont('times', 'bold');
+    doc.setFont('Helvetica', 'bold');
     const titleText = session.title || 'Untitled Session';
     doc.text(titleText, pageWidth / 2, 60, { align: 'center' });
 
