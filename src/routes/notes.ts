@@ -78,16 +78,16 @@ Study Notes:`;
     doc.text(titleText, pageWidth / 2, 60, { align: 'center' });
 
     // Description
+    doc.setFontSize(12);
+    doc.setFont('Helvetica', 'italic');
     if (session.description) {
-      doc.setFontSize(12);
-      doc.setFont('Helvetica', 'italic');
       const descLines = doc.splitTextToSize(session.description, maxWidth);
       doc.text(descLines, pageWidth / 2, 70, { align: 'center' });
     }
 
     // Study notes body
-    doc.setFontSize(11);
-    doc.setFont('times', 'normal');
+    doc.setFontSize(15);
+    doc.setFont('Helvetica', 'normal');
     const bodyStartY = session.description ? 85 : 75;
     const noteLines = doc.splitTextToSize(studyNotes, maxWidth);
     doc.text(noteLines, margin, bodyStartY);
