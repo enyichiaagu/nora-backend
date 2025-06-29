@@ -49,7 +49,7 @@ Study Notes:`;
     // Create PDF
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 20;
+    const margin = 15;
     const maxWidth = pageWidth - margin * 2;
 
     // Load and add logo
