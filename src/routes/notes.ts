@@ -40,7 +40,7 @@ router.get("/:id", async (req, res) => {
 		const model = genAI.getGenerativeModel({
 			model: "gemini-2.5-flash",
 		});
-		const prompt = `Based on the following transcripts, create review notes of the subject of discussion that is presented in paragraphs (exactly 500 words for the entire review notes). Generate lesson notes on the topic use these breaks (separate paragraphs with \n\n). The notes are like lesson notes that a person can read to understand the subject of discussion better. Do not include any headers, titles, or "Study Notes:" labels - just provide the content in the paragraphs:
+		const prompt = `Based on the following transcripts, create review notes of the subject of discussion that is presented in paragraphs (exactly 300 words for the entire review notes). Generate lesson notes on the topic use these breaks (separate paragraphs with \n\n). The notes are like lesson notes that a person can read to understand the subject of discussion better. Do not include any headers, titles, or "Study Notes:" labels - just provide the content in the paragraphs:
 
 Transcripts:
 ${session.notes}`;
@@ -115,13 +115,13 @@ ${session.notes}`;
 		paragraphs.forEach((paragraph, index) => {
 			const paragraphLines = doc.splitTextToSize(
 				paragraph.trim(),
-				maxWidth,
-				{ align: "justify" }
+				maxWidth
+				// { align: "justify" }
 			);
 
 			doc.text(paragraphLines, margin, currentY, {
 				lineHeightFactor: 1.4,
-				align: "justify",
+				// align: "justify",
 			});
 
 			// Use the same factor in height calculation
