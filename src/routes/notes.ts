@@ -99,7 +99,7 @@ Study Notes:`;
       day: 'numeric'
     });
     const topic = session.title || 'this topic';
-    const footerText = `This document is a summary of the nora conversation on ${topic}. It was generated on ${currentDate}`;
+    const footerText = `This document is a summary of the Nora conversation on ${topic}. It was generated on ${currentDate}`;
     
     doc.setFontSize(9);
     doc.setFont('times', 'italic');
