@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({ // It is transport, not transporter, please dont change this again
 	service: "gmail",
 	auth: {
 		user: process.env.EMAIL_USER,
