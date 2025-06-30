@@ -1,10 +1,13 @@
 import { Router } from "express";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
 import { supabase } from "../lib/supabase.js";
 import { generateTitleAndDescription } from "../utils/geminiHelpers.js";
 import { sendScheduledEmail } from "../utils/emailSender.js";
 
 const router = Router();
+
+// Create custom nanoid with only lowercase letters and numbers
+const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 15);
 
 router.post("/", async (req, res) => {
 	try {
@@ -69,8 +72,8 @@ router.post("/", async (req, res) => {
 			conversation_context
 		);
 
-		// Generate call link with 15 character ID (unique identifier)
-		const sessionId = nanoid(15);
+		// Generate call link with 15 character ID (lowercase letters and numbers only)
+		const sessionId = nanoid();
 		const call_link = `https://noratutor.xyz/session/call/s${sessionId}`;
 
 		// Insert into sessions table - explicitly set conversation_id to null
