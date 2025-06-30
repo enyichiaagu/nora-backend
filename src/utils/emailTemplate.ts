@@ -29,7 +29,7 @@ export function generateEmailTemplate(data: EmailTemplateData): {
 	const headerText = isConfirmation ? "Session Confirmed" : "Session Starting Soon";
 	const mainMessage = isConfirmation 
 		? `Your tutoring session "${data.title}" with ${data.tutorName} has been confirmed for ${formattedTime}.`
-		: `Your tutoring session "${data.title}" with ${data.tutorName} starts in 2 minutes at ${formattedTime}.`;
+		: `Your tutoring session "${data.title}" with ${data.tutorName} starts in 1 minute at ${formattedTime}.`;
 
 	// Load logo as base64 with proper error handling
 	let logoBase64 = "";
@@ -120,7 +120,7 @@ export function generateEmailTemplate(data: EmailTemplateData): {
             <td style="background-color: #f7fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="color: #718096; font-size: 12px; margin: 0; line-height: 1.5;">
                 This email was sent by Nora AI Tutoring System.<br>
-                ${isConfirmation ? "You'll receive a reminder with the join link 2 minutes before your session." : "Please join your session now for the best experience."}
+                ${isConfirmation ? "You'll receive a reminder with the join link 1 minute before your session." : "Please join your session now for the best experience."}
               </p>
             </td>
           </tr>

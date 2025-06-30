@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
       "Advanced Calculus Integration Techniques",
       "Learn integration by parts and substitution methods for complex functions.",
       "https://noratutor.xyz/session/call/s123456789012345",
-      new Date(Date.now() + 2 * 60 * 1000).toISOString(),
+      new Date(Date.now() + 1 * 60 * 1000).toISOString(),
       "Dr. Sarah Johnson",
       "reminder"
     );
@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
             <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;">
               <h1 style="color: #28a745; margin-bottom: 20px;">✅ Emails Sent</h1>
               <p style="color: #666; font-size: 16px;">Both confirmation and reminder test emails sent to ${testEmail}</p>
-              <p style="color: #999; font-size: 14px; margin-top: 30px;">Check your inbox for both email types.</p>
+              <p style="color: #999; font-size: 14px; margin-top: 30px;">Reminder now shows 1 minute before session.</p>
             </div>
           </body>
         </html>
