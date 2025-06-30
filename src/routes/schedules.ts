@@ -72,11 +72,12 @@ router.post("/", async (req, res) => {
 			conversation_context
 		);
 
-		// Generate call link with 15 character ID (lowercase letters and numbers only)
+		// Generate call_id with 's' prefix and call_link
 		const sessionId = nanoid();
-		const call_link = `https://noratutor.xyz/session/call/s${sessionId}`;
+		const call_id = `s${sessionId}`;
+		const call_link = `https://noratutor.xyz/session/call/${call_id}`;
 
-		// Insert into sessions table - explicitly set conversation_id to null
+		// Insert into sessions table
 		const { data: session, error: sessionError } = await supabase
 			.from("sessions")
 			.insert({
@@ -93,7 +94,7 @@ router.post("/", async (req, res) => {
 				description,
 				tutor_personality,
 				call_link,
-				conversation_id: null, // Explicitly set to null
+				call_id,
 			})
 			.select()
 			.single();
@@ -133,6 +134,7 @@ router.post("/", async (req, res) => {
 				title: session.title,
 				description: session.description,
 				call_link: session.call_link,
+				call_id: session.call_id,
 			},
 			user_email: profile.email,
 		});
