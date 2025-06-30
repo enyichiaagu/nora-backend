@@ -41,7 +41,10 @@ export function generateEmailTemplate(data: EmailTemplateData): {
 		console.error("Error loading logo:", logoError);
 	}
 
-	const textVersion = `${mainMessage} Description: ${data.description}. Join here: ${data.callLink}`;
+	// Text version - only include link for reminders
+	const textVersion = isConfirmation 
+		? `${mainMessage} Description: ${data.description}.`
+		: `${mainMessage} Description: ${data.description}. Join here: ${data.callLink}`;
 
 	const htmlVersion = `
 <!DOCTYPE html>
@@ -89,11 +92,12 @@ export function generateEmailTemplate(data: EmailTemplateData): {
                 </tr>
               </table>
               
+              ${!isConfirmation ? `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 40px 0;">
                 <tr>
                   <td align="center">
                     <a href="${data.callLink}" style="display: inline-block; background-color: #1661ff; color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(22, 97, 255, 0.3);">
-                      ${isConfirmation ? "Join When Ready" : "Join Now"}
+                      Join Now
                     </a>
                   </td>
                 </tr>
@@ -107,6 +111,7 @@ export function generateEmailTemplate(data: EmailTemplateData): {
                   </td>
                 </tr>
               </table>
+              ` : ''}
               
             </td>
           </tr>
@@ -115,7 +120,7 @@ export function generateEmailTemplate(data: EmailTemplateData): {
             <td style="background-color: #f7fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="color: #718096; font-size: 12px; margin: 0; line-height: 1.5;">
                 This email was sent by Nora AI Tutoring System.<br>
-                ${isConfirmation ? "You'll receive a reminder 2 minutes before your session." : "Please join your session now for the best experience."}
+                ${isConfirmation ? "You'll receive a reminder with the join link 2 minutes before your session." : "Please join your session now for the best experience."}
               </p>
             </td>
           </tr>
