@@ -73,7 +73,7 @@ router.post("/", async (req, res) => {
 		const sessionId = nanoid(15);
 		const call_link = `https://noratutor.xyz/session/call/s${sessionId}`;
 
-		// Insert into sessions table (without conversation_id)
+		// Insert into sessions table - explicitly set conversation_id to null
 		const { data: session, error: sessionError } = await supabase
 			.from("sessions")
 			.insert({
@@ -90,6 +90,7 @@ router.post("/", async (req, res) => {
 				description,
 				tutor_personality,
 				call_link,
+				conversation_id: null, // Explicitly set to null
 			})
 			.select()
 			.single();
