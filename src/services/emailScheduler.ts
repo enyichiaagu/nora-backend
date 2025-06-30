@@ -2,16 +2,16 @@ import { supabase } from "../lib/supabase.js";
 import { sendScheduledEmail } from "../utils/emailSender.js";
 
 export function startEmailScheduler() {
-	// Check for due sessions every 2 minutes to reduce database load
+	// Check for due sessions every minute for 2-minute reminders
 	const interval = setInterval(async () => {
 		try {
 			await processScheduledSessions();
 		} catch (error) {
 			console.error("Error in email scheduler:", error);
 		}
-	}, 120000); // 2 minutes
+	}, 60000); // 1 minute
 
-	console.log("Email scheduler started - checking every 2 minutes");
+	console.log("Email scheduler started - checking every minute for 2-minute reminders");
 
 	// Return cleanup function
 	return () => {
@@ -22,10 +22,10 @@ export function startEmailScheduler() {
 
 async function processScheduledSessions() {
 	try {
-		// Get sessions that are due in exactly 8-10 minutes (single notification window)
+		// Get sessions that are due in exactly 2 minutes
 		const now = new Date();
-		const tenMinutesFromNow = new Date(now.getTime() + 10 * 60000);
-		const eightMinutesFromNow = new Date(now.getTime() + 8 * 60000);
+		const twoMinutesFromNow = new Date(now.getTime() + 2 * 60000);
+		const oneMinuteFromNow = new Date(now.getTime() + 1 * 60000);
 
 		const { data: dueSessions, error } = await supabase
 			.from("sessions")
@@ -42,8 +42,8 @@ async function processScheduledSessions() {
       `
 			)
 			.eq("status", "SCHEDULED")
-			.gte("scheduled_time", eightMinutesFromNow.toISOString())
-			.lte("scheduled_time", tenMinutesFromNow.toISOString());
+			.gte("scheduled_time", oneMinuteFromNow.toISOString())
+			.lte("scheduled_time", twoMinutesFromNow.toISOString());
 
 		if (error) {
 			console.error("Error fetching due sessions:", error);
@@ -54,7 +54,7 @@ async function processScheduledSessions() {
 			return;
 		}
 
-		console.log(`Processing ${dueSessions.length} due sessions`);
+		console.log(`Processing ${dueSessions.length} sessions for 2-minute reminders`);
 
 		// Process each due session
 		for (const session of dueSessions) {
@@ -65,10 +65,11 @@ async function processScheduledSessions() {
 					session.description,
 					session.call_link,
 					session.scheduled_time,
-					session.tutor
+					session.tutor,
+					"reminder"
 				);
 
-				console.log(`Email sent for session ${session.id}`);
+				console.log(`Reminder email sent for session ${session.id}`);
 			} catch (error) {
 				console.error(`Error processing session ${session.id}:`, error);
 			}

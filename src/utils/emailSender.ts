@@ -4,8 +4,7 @@ import {
 	type EmailTemplateData,
 } from "./emailTemplate.js";
 
-const transporter = nodemailer.createTransport({
-	// Don't change this line to createTransporter
+const transporter = nodemailer.createTransporter({
 	service: "gmail",
 	auth: {
 		user: process.env.EMAIL_USER,
@@ -19,7 +18,8 @@ export async function sendScheduledEmail(
 	description: string,
 	callLink: string,
 	scheduledTime: string,
-	tutorName: string
+	tutorName: string,
+	type: "confirmation" | "reminder" = "reminder"
 ): Promise<boolean> {
 	try {
 		const templateData: EmailTemplateData = {
@@ -28,14 +28,19 @@ export async function sendScheduledEmail(
 			callLink,
 			scheduledTime,
 			tutorName,
+			type,
 		};
 
 		const { html, text, logoBase64 } = generateEmailTemplate(templateData);
 
+		const subject = type === "confirmation" 
+			? `Session confirmed with ${tutorName}` 
+			: `Reminder: Your session with ${tutorName} starts in 2 minutes`;
+
 		const mailOptions = {
 			from: `"Nora Tutoring" <${process.env.EMAIL_USER}>`,
 			to,
-			subject: `Reminder for your scheduled call with ${tutorName}`,
+			subject,
 			text,
 			html,
 			attachments: logoBase64
@@ -51,10 +56,10 @@ export async function sendScheduledEmail(
 		};
 
 		await transporter.sendMail(mailOptions);
-		console.log(`Scheduled email sent successfully to ${to}`);
+		console.log(`${type} email sent successfully to ${to}`);
 		return true;
 	} catch (error) {
-		console.error("Error sending scheduled email:", error);
+		console.error(`Error sending ${type} email:`, error);
 		return false;
 	}
 }

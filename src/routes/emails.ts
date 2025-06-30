@@ -19,24 +19,35 @@ router.get("/", async (req, res) => {
       `);
     }
 
-    // Use exact same template that users receive
-    const success = await sendScheduledEmail(
+    // Test both confirmation and reminder emails
+    const confirmationSuccess = await sendScheduledEmail(
       testEmail,
-      "Advanced Calculus Integration Techniques", // Test title
-      "Learn integration by parts and substitution methods for complex functions.", // Test description
-      "https://noratutor.xyz/session/call/s123456789012345", // Test call link
-      new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
-      "Dr. Sarah Johnson" // Test tutor name
+      "Advanced Calculus Integration Techniques",
+      "Learn integration by parts and substitution methods for complex functions.",
+      "https://noratutor.xyz/session/call/s123456789012345",
+      new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      "Dr. Sarah Johnson",
+      "confirmation"
     );
 
-    if (success) {
+    const reminderSuccess = await sendScheduledEmail(
+      testEmail,
+      "Advanced Calculus Integration Techniques",
+      "Learn integration by parts and substitution methods for complex functions.",
+      "https://noratutor.xyz/session/call/s123456789012345",
+      new Date(Date.now() + 2 * 60 * 1000).toISOString(),
+      "Dr. Sarah Johnson",
+      "reminder"
+    );
+
+    if (confirmationSuccess && reminderSuccess) {
       res.send(`
         <html>
           <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4;">
             <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;">
-              <h1 style="color: #28a745; margin-bottom: 20px;">✅ Email Sent</h1>
-              <p style="color: #666; font-size: 16px;">Test email has been successfully sent to ${testEmail}</p>
-              <p style="color: #999; font-size: 14px; margin-top: 30px;">This is the exact same template that users receive for their scheduled sessions.</p>
+              <h1 style="color: #28a745; margin-bottom: 20px;">✅ Emails Sent</h1>
+              <p style="color: #666; font-size: 16px;">Both confirmation and reminder test emails sent to ${testEmail}</p>
+              <p style="color: #999; font-size: 14px; margin-top: 30px;">Check your inbox for both email types.</p>
             </div>
           </body>
         </html>
@@ -47,7 +58,7 @@ router.get("/", async (req, res) => {
           <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4;">
             <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;">
               <h1 style="color: #dc3545; margin-bottom: 20px;">❌ Email Failed</h1>
-              <p style="color: #666; font-size: 16px;">Failed to send test email. Check server logs for details.</p>
+              <p style="color: #666; font-size: 16px;">Failed to send test emails. Check server logs for details.</p>
             </div>
           </body>
         </html>

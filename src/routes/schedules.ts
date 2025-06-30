@@ -2,6 +2,7 @@ import { Router } from "express";
 import { nanoid } from "nanoid";
 import { supabase } from "../lib/supabase.js";
 import { generateTitleAndDescription } from "../utils/geminiHelpers.js";
+import { sendScheduledEmail } from "../utils/emailSender.js";
 
 const router = Router();
 
@@ -98,6 +99,23 @@ router.post("/", async (req, res) => {
 			return res.status(500).json({
 				error: "Failed to create session",
 			});
+		}
+
+		// Send confirmation email immediately
+		try {
+			await sendScheduledEmail(
+				profile.email,
+				title,
+				description,
+				call_link,
+				scheduledDate.toISOString(),
+				tutor,
+				"confirmation"
+			);
+			console.log(`Confirmation email sent for session ${session.id}`);
+		} catch (emailError) {
+			console.error("Error sending confirmation email:", emailError);
+			// Don't fail the request if email fails
 		}
 
 		res.json({
