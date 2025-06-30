@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabase.js";
 import { sendScheduledEmail } from "../utils/emailSender.js";
 
 export function startEmailScheduler() {
-	// Check for due sessions every minute for 2-minute reminders
+	// Check for due sessions every minute for 1-minute reminders
 	const interval = setInterval(async () => {
 		try {
 			await processScheduledSessions();
@@ -11,7 +11,7 @@ export function startEmailScheduler() {
 		}
 	}, 60000); // 1 minute
 
-	console.log("Email scheduler started - checking every minute for 2-minute reminders");
+	console.log("Email scheduler started - checking every minute for 1-minute reminders");
 
 	// Return cleanup function
 	return () => {
@@ -22,10 +22,10 @@ export function startEmailScheduler() {
 
 async function processScheduledSessions() {
 	try {
-		// Get sessions that are due in exactly 2 minutes
+		// Get sessions that are due in exactly 1 minute
 		const now = new Date();
-		const twoMinutesFromNow = new Date(now.getTime() + 2 * 60000);
 		const oneMinuteFromNow = new Date(now.getTime() + 1 * 60000);
+		const thirtySecondsFromNow = new Date(now.getTime() + 30000);
 
 		const { data: dueSessions, error } = await supabase
 			.from("sessions")
@@ -42,8 +42,8 @@ async function processScheduledSessions() {
       `
 			)
 			.eq("status", "SCHEDULED")
-			.gte("scheduled_time", oneMinuteFromNow.toISOString())
-			.lte("scheduled_time", twoMinutesFromNow.toISOString());
+			.gte("scheduled_time", thirtySecondsFromNow.toISOString())
+			.lte("scheduled_time", oneMinuteFromNow.toISOString());
 
 		if (error) {
 			console.error("Error fetching due sessions:", error);
@@ -54,7 +54,7 @@ async function processScheduledSessions() {
 			return;
 		}
 
-		console.log(`Processing ${dueSessions.length} sessions for 2-minute reminders`);
+		console.log(`Processing ${dueSessions.length} sessions for 1-minute reminders`);
 
 		// Process each due session
 		for (const session of dueSessions) {

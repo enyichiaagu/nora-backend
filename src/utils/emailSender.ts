@@ -35,7 +35,7 @@ export async function sendScheduledEmail(
 
 		const subject = type === "confirmation" 
 			? `Session confirmed with ${tutorName}` 
-			: `Reminder: Your session with ${tutorName} starts in 2 minutes`;
+			: `Reminder: Your session with ${tutorName} starts in 1 minute`;
 
 		const mailOptions = {
 			from: `"Nora Tutoring" <${process.env.EMAIL_USER}>`,
