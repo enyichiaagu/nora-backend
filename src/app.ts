@@ -18,6 +18,9 @@ const server = createServer(app);
 app.use(cors());
 app.use(express.json());
 
+// Serve static files
+app.use(express.static('public'));
+
 // Routes
 app.use("/ping", pingRouter);
 app.use("/conversations", conversationRouter);
