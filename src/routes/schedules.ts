@@ -69,17 +69,15 @@ router.post("/", async (req, res) => {
 			conversation_context
 		);
 
-		// Generate unique IDs
+		// Generate call link with 15 character ID (unique identifier)
 		const sessionId = nanoid(15);
-		const conversationId = nanoid(16); // Generate unique conversation_id
 		const call_link = `https://noratutor.xyz/session/call/s${sessionId}`;
 
-		// Insert into sessions table
+		// Insert into sessions table (without conversation_id)
 		const { data: session, error: sessionError } = await supabase
 			.from("sessions")
 			.insert({
 				user_id: userId,
-				conversation_id: conversationId, // Add the conversation_id
 				status: "SCHEDULED",
 				scheduled_time: scheduledDate.toISOString(),
 				duration,
