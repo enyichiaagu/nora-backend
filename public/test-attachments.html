@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Attachments API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #333; 
+            margin-bottom: 1rem; 
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="file"], textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        button {
+            background: #1661ff;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: Georgia, serif;
+            line-height: 1.6;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .file-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        .supported-formats {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 14px;
+        }
+        .supported-formats h3 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+        }
+        .supported-formats ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Test Attachments API</h1>
+        
+        <div class="supported-formats">
+            <h3>Supported File Formats:</h3>
+            <ul>
+                <li>Images: JPEG, PNG, GIF, WebP</li>
+                <li>Documents: PDF, Text files (.txt), CSV, JSON</li>
+                <li>Maximum file size: 10MB</li>
+            </ul>
+        </div>
+
+        <form id="attachmentForm">
+            <div class="form-group">
+                <label for="file">Select File:</label>
+                <input type="file" id="file" name="file" required 
+                       accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.csv,.json">
+                <div class="file-info">Choose a file that Gemini can process for lesson note generation.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="context">Conversational Context:</label>
+                <textarea id="context" name="conversational_context" 
+                          placeholder="Enter the discussion context that should be blended with the file content to create lesson notes..."
+                          required></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">Generate Lesson Notes</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('attachmentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('file');
+            const contextInput = document.getElementById('context');
+            
+            if (!fileInput.files[0]) {
+                showResult('Please select a file.', 'error');
+                return;
+            }
+            
+            if (!contextInput.value.trim()) {
+                showResult('Please enter conversational context.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('conversational_context', contextInput.value.trim());
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            showResult('Processing file and generating lesson notes...', 'loading');
+
+            try {
+                const response = await fetch('/attachments', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(`Generated Lesson Notes (200 words):\n\n${data.generated_context}`, 'success');
+                } else {
+                    showResult(`Error: ${data.error || 'Unknown error occurred'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Network Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Lesson Notes';
+            }
+        });
+
+        function showResult(message, type) {
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // File size validation
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.size > 10 * 1024 * 1024) {
+                showResult('File size must be less than 10MB', 'error');
+                e.target.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

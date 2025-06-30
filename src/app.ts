@@ -8,6 +8,7 @@ import { conversationRouter } from "./routes/conversations.js";
 import { notesRouter } from "./routes/notes.js";
 import { schedulesRouter } from "./routes/schedules.js";
 import { emailsRouter } from "./routes/emails.js";
+import { attachmentsRouter } from "./routes/attachments.js";
 import { startEmailScheduler } from './services/emailScheduler.js';
 
 const app = express();
@@ -17,12 +18,16 @@ const server = createServer(app);
 app.use(cors());
 app.use(express.json());
 
+// Serve static files
+app.use(express.static('public'));
+
 // Routes
 app.use("/ping", pingRouter);
 app.use("/conversations", conversationRouter);
 app.use("/notes", notesRouter);
 app.use("/schedules", schedulesRouter);
 app.use("/emails", emailsRouter);
+app.use("/attachments", attachmentsRouter);
 
 // WebSocket setup
 setupWebSocket(server);
