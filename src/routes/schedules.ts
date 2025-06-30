@@ -69,8 +69,9 @@ router.post("/", async (req, res) => {
 			conversation_context
 		);
 
-		// Generate call link with 15 character ID
+		// Generate unique IDs
 		const sessionId = nanoid(15);
+		const conversationId = nanoid(16); // Generate unique conversation_id
 		const call_link = `https://noratutor.xyz/session/call/s${sessionId}`;
 
 		// Insert into sessions table
@@ -78,6 +79,7 @@ router.post("/", async (req, res) => {
 			.from("sessions")
 			.insert({
 				user_id: userId,
+				conversation_id: conversationId, // Add the conversation_id
 				status: "SCHEDULED",
 				scheduled_time: scheduledDate.toISOString(),
 				duration,
