@@ -9,6 +9,7 @@ import { notesRouter } from "./routes/notes.js";
 import { schedulesRouter } from "./routes/schedules.js";
 import { emailsRouter } from "./routes/emails.js";
 import { attachmentsRouter } from "./routes/attachments.js";
+import { docsRouter } from "./routes/docs.js";
 import { startEmailScheduler } from './services/emailScheduler.js';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/notes", notesRouter);
 app.use("/schedules", schedulesRouter);
 app.use("/emails", emailsRouter);
 app.use("/attachments", attachmentsRouter);
+app.use("/docs", docsRouter);
 
 // WebSocket setup
 setupWebSocket(server);
